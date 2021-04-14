@@ -8,27 +8,29 @@
 
 import { MethodsType } from "../types";
 
-const eq: string = 'eq';
+const eq: string = "eq";
+const type: string = "type";
 
-const uid: string = 'uid';
+const uid: string = "uid";
 
-const allofterms: string = 'allofterms';
+const allofterms: string = "allofterms";
 
-const anyofterms: string = 'anyofterms';
+const anyofterms: string = "anyofterms";
 
-const regexp: string = 'regexp';
+const regexp: string = "regexp";
 
-const anyoftext: string = 'anyoftext';
+const anyoftext: string = "anyoftext";
 
-const alloftext: string = 'alloftext';
+const alloftext: string = "alloftext";
 
-const has: string = 'has';
+const has: string = "has";
 
-const near: string = 'near';
+const near: string = "near";
 
-const contains: string = 'contains';
+const contains: string = "contains";
 
 const Methods: MethodsType = {
+  type,
   eq,
   uid,
   allofterms,
@@ -38,6 +40,6 @@ const Methods: MethodsType = {
   alloftext,
   has,
   near,
-  contains
-}
+  contains,
+};
 export default Methods;

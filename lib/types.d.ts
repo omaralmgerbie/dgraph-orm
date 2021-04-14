@@ -1,4 +1,4 @@
-import { ChannelCredentials } from 'grpc';
+import { ChannelCredentials } from '@grpc/grpc-js';
 interface Base {
     include?: Include;
     filter?: Filter;

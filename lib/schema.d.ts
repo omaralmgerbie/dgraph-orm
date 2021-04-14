@@ -5,7 +5,7 @@
  *
  * @author Ashok Vishwakarma <akvlko@gmail.com>
  */
-import { SchemaFields } from './types';
+import { SchemaFields } from "./types";
 /**
  * Schema
  *

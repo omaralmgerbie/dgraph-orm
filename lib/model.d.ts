@@ -10,14 +10,14 @@
  *
  * dgraph-orm Schema class
  */
-import Schema from './schema';
+import Schema from "./schema";
 /**
  * Connection
  *
  * dgraph-orm Connection class
  */
-import Connection from './connection';
-import { QueryParams, RelationParam } from './types';
+import Connection from "./connection";
+import { QueryParams, RelationParam } from "./types";
 /**
  * Model
  *

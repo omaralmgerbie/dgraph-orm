@@ -124,11 +124,11 @@ class Query {
       case methods.alloftext:
       case methods.anyofterms:
       case methods.anyoftext:
-        _where = `(func: ${type}(${name}.${field}, ${'"' + value + '"'}){{ORDER}}{{LIMIT}})`;
+        _where = `(func: ${type}(${field}, ${'"' + value + '"'}){{ORDER}}{{LIMIT}})`;
       break;
 
       case methods.regexp:
-        _where = `(func: ${type}(${name}.${field}, ${value}){{ORDER}}{{LIMIT}})`;
+        _where = `(func: ${type}(${field}, ${value}){{ORDER}}{{LIMIT}})`;
       break;
 
       case methods.uid:
@@ -137,17 +137,23 @@ class Query {
         }
         _where = `(func: ${methods.uid}(${field}){{ORDER}}{{LIMIT}})`;
       break;
+      case methods.type:
+        if(Array.isArray(field)) {
+          field = field.join(', ');
+        }
+        _where = `(func: ${methods.type}(${field}){{ORDER}}{{LIMIT}})`;
+      break;
 
       case methods.has:
-        _where = `(func: ${methods.has}(${name}.${field}){{ORDER}}{{LIMIT}})`;
+        _where = `(func: ${methods.has}(${field}){{ORDER}}{{LIMIT}})`;
       break;
 
       case methods.near:
-        _where = `(func: ${methods.near}(${name}.${field}, [${value.longitude}, ${value.latitude}], ${value.distance}){{ORDER}}{{LIMIT}})`;
+        _where = `(func: ${methods.near}(${field}, [${value.longitude}, ${value.latitude}], ${value.distance}){{ORDER}}{{LIMIT}})`;
       break;
 
       case methods.contains:
-        _where = `(func: ${methods.contains}(${name}.${field}, [${value.longitude}, ${value.latitude}]){{ORDER}}{{LIMIT}})`;
+        _where = `(func: ${methods.contains}(${field}, [${value.longitude}, ${value.latitude}]){{ORDER}}{{LIMIT}})`;
       break;
       
     }
@@ -165,11 +171,11 @@ class Query {
    */
   private _filter(key: string, value: any, name: string): string {
     if(key.toLowerCase() === '$has') {
-      return `${key.replace('$', '')}(${name}.${value})`;
+      return `${key.replace('$', '')}(${value})`;
     }
 
     if(typeof value === 'string') {
-      return `eq(${name}.${key}, "${value}")`; 
+      return `eq(${key}, "${value}")`; 
     }
 
     if(typeof value === 'object' && !Array.isArray(value)) {
@@ -181,7 +187,7 @@ class Query {
         if(Array.isArray(_value)) {
           const _sub: Array<string> = [];
           _value.forEach((_val: any) => {
-            _sub.push(`uid_in(${name}.${key}, ${_val})`);
+            _sub.push(`uid_in(${key}, ${_val})`);
           });
 
           return _sub.join(' OR ');
@@ -192,10 +198,10 @@ class Query {
         }
 
         if(_key === '$ne') {
-          return `NOT eq(${name}.${key}, ${_value})`; 
+          return `NOT eq(${key}, ${_value})`; 
         }
 
-        return `${_key.replace('$', '')}(${name}.${key}, ${_value})`; 
+        return `${_key.replace('$', '')}(${key}, ${_value})`; 
       }
     }
   }
@@ -254,7 +260,7 @@ class Query {
       if(attr === 'uid') {
         _attrs.push('uid');
       }else {
-        _attrs.push(`${attr}: ${name}.${attr}`);
+        _attrs.push(`${attr}`);
       }
     }
     
@@ -277,11 +283,11 @@ class Query {
     for(let relation of Object.keys(include)) {
 
       if(include[relation].count) {
-        _inc += `${include[relation].as ? include[relation].as : relation}: count(${name}.${relation})`;
+        _inc += `${include[relation].as ? include[relation].as : relation}: count(${relation})`;
         continue;
       }
 
-      _inc += `${include[relation].as ? include[relation].as : relation}: ${name}.${relation}`;
+      _inc += `${include[relation].as ? include[relation].as : relation}: ${relation}`;
 
       const _limit: string = this._extras(include[relation]);
       const _order: string = this._parse_order(include[relation].order);

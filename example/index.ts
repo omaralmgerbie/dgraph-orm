@@ -1,6 +1,8 @@
-import grpc from 'grpc';
+import grpc from "@grpc/grpc-js";
 
-import dgraph from '../src';
+import dgraph from "../src";
+
+// console.log(grpc.credentials.createInsecure());
 
 /**
  * dgraph.connect
@@ -21,7 +23,7 @@ dgraph.connect({
    * 
    * @default 'localhost'
    */
-  host: 'localhost',
+  host: "localhost",
 
   /**
    * port
@@ -40,7 +42,7 @@ dgraph.connect({
    * @default grpc.credentials.createInsecure()
    * 
    */
-  credentails: grpc.credentials.createInsecure(),
+  // credentails: grpc.credentials.createInsecure(),
 
   /**
    * debug
@@ -49,7 +51,7 @@ dgraph.connect({
    * 
    * @default false
    */
-  debug: false
+  debug: false,
 });
 
 /**
@@ -71,7 +73,7 @@ dgraph.logging(console.log);
  * 
  * user.name string @index(term)
  */
-const UserSchema = new dgraph.Schema('user', {
+const UserSchema = new dgraph.Schema("user", {
   /**
    * Generated Dgraph Schema
    * 
@@ -83,8 +85,8 @@ const UserSchema = new dgraph.Schema('user', {
     lang: true,
     token: {
       term: true,
-      trigram: true
-    }
+      trigram: true,
+    },
   },
 
   /**
@@ -104,8 +106,8 @@ const UserSchema = new dgraph.Schema('user', {
     index: true,
     unique: true,
     token: {
-      exact: true
-    }
+      exact: true,
+    },
   },
   /**
    * Generated Dgraph Schema
@@ -120,7 +122,7 @@ const UserSchema = new dgraph.Schema('user', {
    */
   age: {
     type: dgraph.Types.INT,
-    index: true
+    index: true,
   },
 
   /**
@@ -130,14 +132,14 @@ const UserSchema = new dgraph.Schema('user', {
    */
   friend: {
     type: dgraph.Types.UID,
-    model: 'user',
-    count: true
+    model: "user",
+    count: true,
   },
   avatar: {
     type: dgraph.Types.UID,
-    model: 'media',
-    replace: true
-  }
+    model: "media",
+    replace: true,
+  },
 });
 
 /**
@@ -147,26 +149,26 @@ const UserSchema = new dgraph.Schema('user', {
  */
 const User = dgraph.model(UserSchema);
 
-const PostSchema = new dgraph.Schema('post', {
+const PostSchema = new dgraph.Schema("post", {
   title: dgraph.Types.STRING,
   content: dgraph.Types.STRING,
   author: {
     type: dgraph.Types.UID,
-    model: 'user',
-    replace: true
+    model: "user",
+    replace: true,
   },
   banner: {
     type: dgraph.Types.UID,
-    model: 'media',
-    replace: true
-  }
+    model: "media",
+    replace: true,
+  },
 });
 
 const Post = dgraph.model(PostSchema);
 
-const MediaSchema = new dgraph.Schema('media', {
+const MediaSchema = new dgraph.Schema("media", {
   type: dgraph.Types.STRING,
-  src: dgraph.Types.STRING
+  src: dgraph.Types.STRING,
 });
 
 const Media = dgraph.model(MediaSchema);
@@ -342,25 +344,24 @@ const Media = dgraph.model(MediaSchema);
   //   banner: '0x7533'
   // }, '0xc353');
 
-  const posts = await Post.uid('0x9c41', {
+  const posts = await Post.uid("0x9c41", {
     include: {
       author: {
-        as: 'author',
+        as: "author",
         include: {
           friend: {
-            as: 'friends'
+            as: "friends",
           },
           avatar: {
-            as: 'avatar'
-          }
+            as: "avatar",
+          },
         },
       },
       banner: {
-        as: 'banner'
-      }
-    }
+        as: "banner",
+      },
+    },
   });
 
   console.log(posts);
-
 })();

@@ -18,7 +18,7 @@ import * as dgraph from 'dgraph-js';
  * 
  * https://www.npmjs.com/package/grpc
  */
-import * as grpc from 'grpc';
+import * as grpc from '@grpc/grpc-js';
 
 import { ConnectionConfig } from './types';
 

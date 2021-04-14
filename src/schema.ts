@@ -9,9 +9,9 @@
 /**
  * helper utilities
  */
-import { prepareSchema, checkOptions } from './helpers/utility';
+import { checkOptions, prepareSchema } from "./helpers/utility";
 
-import { SchemaFields, FieldProps } from './types';
+import { FieldProps, SchemaFields } from "./types";
 
 /**
  * Schema
@@ -19,7 +19,6 @@ import { SchemaFields, FieldProps } from './types';
  * Schema class
  */
 class Schema {
-
   /**
    * name
    * 
@@ -40,7 +39,7 @@ class Schema {
    * @type SchemaFields
    */
   original: SchemaFields;
-  
+
   /**
    * 
    * @param name {string}
@@ -74,10 +73,13 @@ class Schema {
    */
   private _generate(name: string, original: SchemaFields): Array<string> {
     const _schema: Array<string> = [];
+    let _type: string = `type ${name} {`;
     Object.keys(original).forEach((key: string) => {
-      _schema.push(name + '.' + this._build(key, original[key]));
+      _schema.push(this._build(key, original[key]));
+      _type = `${_type}\n${key}`;
     });
-
+    _type = `${_type}\n}`;
+    _schema.push(_type);
     return _schema;
   }
 }

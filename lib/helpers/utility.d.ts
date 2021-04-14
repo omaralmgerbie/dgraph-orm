@@ -5,7 +5,7 @@
  *
  * @author Ashok Vishwakarma <akvlko@gmail.com>
  */
-import { FieldProps } from '../types';
+import { FieldProps } from "../types";
 /**
  * checkOptions
  * @param name {string}
@@ -29,7 +29,7 @@ export declare const prepareSchema: (name: string, options: string | FieldProps)
  *
  * @returns Array<string>
  */
-export declare const pluck: (arr: any[], key: string) => any[];
+export declare const pluck: (arr: Array<any>, key: string) => Array<any>;
 /**
  * merge
  *
