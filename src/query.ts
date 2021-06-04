@@ -1,4 +1,3 @@
-
 /**
  * Query
  * 
@@ -12,16 +11,16 @@
  * 
  * dgraph-orm model methods
  */
-import methods from './helpers/methods';
+import methods from "./helpers/methods";
 
-import { Params, Include } from './types';
+import { Include, Params } from "./types";
 
 /**
  * _conditions
  * 
  * @type Array<string>
  */
-const _conditions: Array<string> = ['$or', '$and'];
+const _conditions: Array<string> = ["$or", "$and"];
 
 /**
  * Query
@@ -29,7 +28,6 @@ const _conditions: Array<string> = ['$or', '$and'];
  * Class Query
  */
 class Query {
-
   /**
    * name
    * 
@@ -95,7 +93,14 @@ class Query {
    * @param name {string}
    * @param logger {Function}
    */
-  constructor(type: string, field: string, value: any, params: Params, name: string, logger: Function) {
+  constructor(
+    type: string,
+    field: string,
+    value: any,
+    params: Params,
+    name: string,
+    logger: Function,
+  ) {
     this.name = name;
     this.params = params;
     this.type = type;
@@ -103,7 +108,7 @@ class Query {
     this.value = value;
     this.logger = logger;
     this.where = this._where(this.type, this.field, this.value, this.name);
-    this.query = this._build(this.params)
+    this.query = this._build(this.params);
   }
 
   /**
@@ -115,8 +120,13 @@ class Query {
    * 
    * @returns string
    */
-  private _where(type: string, field: string, value: any, name: string): string {
-    let _where = '';
+  private _where(
+    type: string,
+    field: string,
+    value: any,
+    name: string,
+  ): string {
+    let _where = "";
 
     switch (type) {
       case methods.eq:
@@ -124,38 +134,40 @@ class Query {
       case methods.alloftext:
       case methods.anyofterms:
       case methods.anyoftext:
-        _where = `(func: ${type}(${field}, ${'"' + value + '"'}){{ORDER}}{{LIMIT}})`;
-      break;
+        _where = `(func: ${type}(${field}, ${'"' + value +
+          '"'}){{ORDER}}{{LIMIT}})`;
+        break;
 
       case methods.regexp:
         _where = `(func: ${type}(${field}, ${value}){{ORDER}}{{LIMIT}})`;
-      break;
+        break;
 
       case methods.uid:
-        if(Array.isArray(field)) {
-          field = field.join(', ');
+        if (Array.isArray(field)) {
+          field = field.join(", ");
         }
         _where = `(func: ${methods.uid}(${field}){{ORDER}}{{LIMIT}})`;
-      break;
+        break;
       case methods.type:
-        if(Array.isArray(field)) {
-          field = field.join(', ');
+        if (Array.isArray(field)) {
+          field = field.join(", ");
         }
         _where = `(func: ${methods.type}(${field}){{ORDER}}{{LIMIT}})`;
-      break;
+        break;
 
       case methods.has:
         _where = `(func: ${methods.has}(${field}){{ORDER}}{{LIMIT}})`;
-      break;
+        break;
 
       case methods.near:
-        _where = `(func: ${methods.near}(${field}, [${value.longitude}, ${value.latitude}], ${value.distance}){{ORDER}}{{LIMIT}})`;
-      break;
+        _where =
+          `(func: ${methods.near}(${field}, [${value.longitude}, ${value.latitude}], ${value.distance}){{ORDER}}{{LIMIT}})`;
+        break;
 
       case methods.contains:
-        _where = `(func: ${methods.contains}(${field}, [${value.longitude}, ${value.latitude}]){{ORDER}}{{LIMIT}})`;
-      break;
-      
+        _where =
+          `(func: ${methods.contains}(${field}, [${value.longitude}, ${value.latitude}]){{ORDER}}{{LIMIT}})`;
+        break;
     }
 
     return _where;
@@ -170,38 +182,38 @@ class Query {
    * @returns string
    */
   private _filter(key: string, value: any, name: string): string {
-    if(key.toLowerCase() === '$has') {
-      return `${key.replace('$', '')}(${value})`;
+    if (key.toLowerCase() === "$has") {
+      return `${key.replace("$", "")}(${value})`;
     }
 
-    if(typeof value === 'string') {
-      return `eq(${key}, "${value}")`; 
+    if (typeof value === "string") {
+      return `eq(${key}, "${value}")`;
     }
 
-    if(typeof value === 'object' && !Array.isArray(value)) {
+    if (typeof value === "object" && !Array.isArray(value)) {
       const _key = Object.keys(value)[0];
 
-      if(_key) {
+      if (_key) {
         let _value = value[_key];
-        
-        if(Array.isArray(_value)) {
+
+        if (Array.isArray(_value)) {
           const _sub: Array<string> = [];
           _value.forEach((_val: any) => {
             _sub.push(`uid_in(${key}, ${_val})`);
           });
 
-          return _sub.join(' OR ');
+          return _sub.join(" OR ");
         }
-  
-        if(typeof _value === 'string' && _key !== '$regexp') {
+
+        if (typeof _value === "string" && _key !== "$regexp") {
           _value = '"' + _value + '"';
         }
 
-        if(_key === '$ne') {
-          return `NOT eq(${key}, ${_value})`; 
+        if (_key === "$ne") {
+          return `NOT eq(${key}, ${_value})`;
         }
 
-        return `${_key.replace('$', '')}(${key}, ${_value})`; 
+        return `${_key.replace("$", "")}(${key}, ${_value})`;
       }
     }
   }
@@ -214,37 +226,38 @@ class Query {
    * @returns string
    */
   private _parse_filter(filter: any, name: string): string {
+    const _filters: Array<any> = [];
 
-    const _filters: Array<any> = []
-
-    if(typeof filter !== 'undefined') {
-      Object.keys(filter).forEach(_key => {
-        if(_conditions.indexOf(_key.toLowerCase()) === -1) {
+    if (typeof filter !== "undefined") {
+      Object.keys(filter).forEach((_key) => {
+        if (_conditions.indexOf(_key.toLowerCase()) === -1) {
           _filters.push(this._filter(_key, filter[_key], name));
         } else {
           const _sub: Array<string> = [];
-          Object.keys(filter[_key]).forEach(_k => {
-            if(Array.isArray(filter[_key][_k])) {
+          Object.keys(filter[_key]).forEach((_k) => {
+            if (Array.isArray(filter[_key][_k])) {
               filter[_key][_k].forEach((_val: any) => {
                 _sub.push(this._filter(_k, _val, name));
-              })
-            }else {
+              });
+            } else {
               _sub.push(this._filter(_k, filter[_key][_k], name));
             }
           });
 
-          if(_sub.length > 0) {
-            _filters.push(`(${_sub.join(` ${_key.replace('$', '').toUpperCase()} `)})`);
+          if (_sub.length > 0) {
+            _filters.push(
+              `(${_sub.join(` ${_key.replace("$", "").toUpperCase()} `)})`,
+            );
           }
         }
       });
     }
 
-    if(_filters.length > 0) {
-      return ` @filter(${_filters.join(' AND ')})`;
+    if (_filters.length > 0) {
+      return ` @filter(${_filters.join(" AND ")})`;
     }
 
-    return '';
+    return "";
   }
 
   /**
@@ -256,15 +269,15 @@ class Query {
    */
   private _attributes(attributes: Array<string>, name: string): string {
     const _attrs: Array<string> = [];
-    for(let attr of attributes) {
-      if(attr === 'uid') {
-        _attrs.push('uid');
-      }else {
+    for (let attr of attributes) {
+      if (attr === "uid") {
+        _attrs.push("uid");
+      } else {
         _attrs.push(`${attr}`);
       }
     }
-    
-    return _attrs.join('\n');
+
+    return _attrs.join("\n");
   }
 
   /**
@@ -274,40 +287,58 @@ class Query {
    * @returns string
    */
   private _include(include: Include, name: string = this.name): string {
-    let _inc: string = '';
+    let _inc: string = "";
 
-    if(!include) {
+    if (!include) {
       return _inc;
     }
 
-    for(let relation of Object.keys(include)) {
-
-      if(include[relation].count) {
-        _inc += `${include[relation].as ? include[relation].as : relation}: count(${relation})`;
-        continue;
+    for (let relation of Object.keys(include)) {
+      if (include[relation].count) {
+        _inc += `${
+          include[relation].as ? include[relation].as : relation
+        }Count: count(${relation})`;
+        // continue;
+      }
+      if (include[relation].reverse) {
+        _inc += `
+        ${
+          include[relation].reverse
+            ? include[relation].reverse
+            : `${relation}Reverse`
+        }: ~${relation}{uid
+          expand(_all_)}`;
+        // continue;
       }
 
-      _inc += `${include[relation].as ? include[relation].as : relation}: ${relation}`;
+      _inc += `
+      ${
+        include[relation].as ? include[relation].as : relation
+      }: ${relation}`;
 
       const _limit: string = this._extras(include[relation]);
       const _order: string = this._parse_order(include[relation].order);
 
-      if(include[relation].filter) {
-        _inc +=  `${this._parse_filter(include[relation].filter, include[relation].model)}`
+      if (include[relation].filter) {
+        _inc += `${
+          this._parse_filter(include[relation].filter, include[relation].model)
+        }`;
       }
 
-      if(_limit) {
+      if (_limit) {
         _inc += ` (${_limit}) `;
       }
 
-      if(_order) {
+      if (_order) {
         _inc += ` (${_order})`;
       }
 
       _inc += `{
-        ${this._attributes(include[relation].attributes, include[relation].model)}
+        ${
+        this._attributes(include[relation].attributes, include[relation].model)
+      }
         ${this._include(include[relation].include, include[relation].model)}
-      }`
+      }`;
     }
 
     return _inc;
@@ -322,23 +353,23 @@ class Query {
   private _extras(params: Params): string {
     let _extra = [];
 
-    if(params.first && typeof params.first === 'number') {
+    if (params.first && typeof params.first === "number") {
       _extra.push(`first: ${params.first}`);
     }
 
-    if(params.offset && typeof params.offset === 'number') {
+    if (params.offset && typeof params.offset === "number") {
       _extra.push(`offset: ${params.offset}`);
     }
 
-    if(params.after) {
+    if (params.after) {
       _extra.push(`after: ${params.after}`);
     }
 
-    if(_extra.length > 0) {
-      return `${_extra.join(', ')}`;
+    if (_extra.length > 0) {
+      return `${_extra.join(", ")}`;
     }
 
-    return '';
+    return "";
   }
 
   /**
@@ -350,23 +381,23 @@ class Query {
   private _parse_order(order: Array<any>): string {
     const _order: Array<string> = [];
 
-    if(order && order.length > 0) {
-      if(Array.isArray(order[0])) {
+    if (order && order.length > 0) {
+      if (Array.isArray(order[0])) {
         order.forEach((_o: any) => {
-          if(typeof _o[1] !== 'undefined') {
+          if (typeof _o[1] !== "undefined") {
             _order.push(`order${_o[1].toLowerCase()}: ${this.name}.${_o[0]}`);
           }
         });
-      }else {
+      } else {
         _order.push(`order${order[1].toLowerCase()}: ${this.name}.${order[0]}`);
       }
     }
 
-    if(_order.length > 0) {
-      return `${_order.join(', ')}`;
+    if (_order.length > 0) {
+      return `${_order.join(", ")}`;
     }
 
-    return '';
+    return "";
   }
 
   /**
@@ -379,18 +410,22 @@ class Query {
     let _order: string = this._parse_order(params.order);
     let _limit: string = this._extras(params);
 
-    if(_order) {
+    if (_order) {
       _order = `, ${_order}`;
     }
 
-    if(_limit) {
+    if (_limit) {
       _limit = `, ${_limit}`;
     }
 
     const query: string = `{
-      ${this.name} ${this.where.replace('{{ORDER}}', _order).replace('{{LIMIT}}', _limit)} ${this._parse_filter(params.filter, this.name)} {
+      ${this.name} ${
+      this.where.replace("{{ORDER}}", _order).replace("{{LIMIT}}", _limit)
+    } ${this._parse_filter(params.filter, this.name)} {
         ${this._attributes(params.attributes, this.name)}
         ${this._include(params.include)}
+        dgraphType:dgraph.type
+        
       }
     }`;
 

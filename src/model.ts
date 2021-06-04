@@ -296,6 +296,9 @@ class Model {
     if (type === methods.uid || type === methods.has) {
       params = value;
       value = field;
+    } else if (type === methods.type) {
+      field = this.schema.name;
+      params = value;
     }
 
     const _params: any = this._validate(this.schema.original, params);
@@ -436,7 +439,7 @@ class Model {
 
         if (_unique_check) {
           await _txn.discard();
-          return reject(new Error(`[Unique Constraint]: ${_unique_check}`));
+          return reject({ message: _unique_check });
         }
 
         mu.setCommitNow(true);
@@ -529,12 +532,12 @@ class Model {
 
     let _delete: any = null;
     let _isDelete: boolean = false;
-
+    delete data.uid;
     Object.keys(data).forEach((_key: string) => {
       _delete = {};
       if (this.schema.original[_key].replace) {
         _isDelete = true;
-        _delete[`${this.schema.name}.${_key}`] = null;
+        _delete[`${_key}`] = null;
       }
     });
 
@@ -575,7 +578,7 @@ class Model {
       try {
         const mu = new this.connection.dgraph.Mutation();
         mu.setCommitNow(true);
-        mu.setIgnoreIndexConflict(true);
+        // mu.setIgnoreIndexConflict(true);
         mu.setDeleteJson(mutation);
 
         await _txn.mutate(mu);
@@ -659,19 +662,20 @@ class Model {
           _params[`${_key}`] = null;
         }
       }
+      console.log(_params);
 
-      // if(Array.isArray(uid)) {
-      //   const _p: any = [];
-      //   uid.forEach(_uid => {
-      //     _params.uid = _uid;
-      //     _p.push(_params);
-      //   });
+      if (Array.isArray(uid)) {
+        const _p: any = [];
+        uid.forEach((_uid) => {
+          _params.uid = _uid;
+          _p.push(_params);
+        });
 
-      //   return this._delete(_p);
-      // }
+        return this._delete(_p);
+      }
 
-      // _params.uid = uid;
-      // return this._delete(_params);
+      _params.uid = uid;
+      return this._delete(_params);
     }
   }
 
@@ -768,7 +772,9 @@ class Model {
     let haveData: boolean = false;
 
     if (!Array.isArray(data)) {
-      attributes = Object.keys(data);
+      attributes = Object.keys(data).filter((value, index, arr) => {
+        return value != "uid";
+      });
       haveData = true;
     }
 

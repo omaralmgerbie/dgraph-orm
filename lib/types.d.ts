@@ -53,6 +53,7 @@ export interface TypesType {
     UID: string;
 }
 export interface MethodsType {
+    type: string;
     eq: string;
     uid: string;
     allofterms: string;

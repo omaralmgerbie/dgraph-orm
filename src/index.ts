@@ -17,44 +17,63 @@
  * 
  * https://www.npmjs.com/package/dgraph-js
  */
-import { Operation } from 'dgraph-js';
+import { DgraphClient, Operation } from "dgraph-js";
 
 /**
  * Mutation
  * 
  * from dgraph-orm for mutation
  */
-import { Mutation } from 'dgraph-js/generated/api_pb';
+import { Mutation } from "dgraph-js/generated/api_pb";
 
 /**
  * Schema
  * 
  * dgraph-orm Schema class
  */
-import Schema from './schema';
+import Schema from "./schema";
 
 /**
  * Types
  * 
  * dgraph-orm feilds Types
  */
-import Types from './helpers/types';
+import Types from "./helpers/types";
 
 /**
  * Connection 
  * 
  * dgraph-orm Connection class
  */
-import Connection from './connection';
+import Connection from "./connection";
 
 /**
  * Model
  * 
  * dgraph-orm Model class
  */
-import Model from './model';
+import Model from "./model";
 
-import { TypesType, SchemaFields, ConnectionConfig, QueryParams } from './types';
+/**
+ * Query
+ *
+ * dgraph-orm Query class
+ */
+import Query from "./query";
+
+/**
+ * methods
+ *
+ * dgraph-orm model methods
+ */
+import methods from "./helpers/methods";
+
+import {
+  ConnectionConfig,
+  QueryParams,
+  SchemaFields,
+  TypesType,
+} from "./types";
 
 /**
  * DgraphORM
@@ -62,7 +81,6 @@ import { TypesType, SchemaFields, ConnectionConfig, QueryParams } from './types'
  * DgraphORM class
  */
 class DgraphORM {
-
   /**
    * _logger
    * 
@@ -102,7 +120,7 @@ class DgraphORM {
    * 
    * Schema class
    */
-  Schema: {new(name: string, schema: SchemaFields): Schema} = Schema;
+  Schema: { new (name: string, schema: SchemaFields): Schema } = Schema;
 
   /**
    * contructor
@@ -143,7 +161,6 @@ class DgraphORM {
     this._logger(message);
   }
 
-
   /**
    * _set_model
    * 
@@ -152,7 +169,7 @@ class DgraphORM {
    * @returns void
    */
   private _set_model(schema: Schema): void {
-    if(schema.name && typeof this.models[schema.name] === 'undefined') {
+    if (schema.name && typeof this.models[schema.name] === "undefined") {
       this.models[schema.name] = schema.original;
       this._generate_schema(schema.schema);
     }
@@ -166,9 +183,9 @@ class DgraphORM {
    * @returns void
    */
   async _generate_schema(schema: Array<string>): Promise<any> {
-    const op: Operation  = new this.connection.dgraph.Operation();
+    const op: Operation = new this.connection.dgraph.Operation();
     op.setSchema(schema.join("\n"));
-    this.connection.client.alter(op).catch(error => {});
+    this.connection.client.alter(op).catch((error) => {});
   }
 
   /**
@@ -192,7 +209,12 @@ class DgraphORM {
   model(schema: Schema): Model {
     this._set_model(schema);
 
-    return new Model(schema, this.models, this.connection, this._log.bind(this));
+    return new Model(
+      schema,
+      this.models,
+      this.connection,
+      this._log.bind(this),
+    );
   }
 
   /**
@@ -202,7 +224,7 @@ class DgraphORM {
    * 
    * @returns void
    */
-  connect(config: ConnectionConfig): Connection  {
+  connect(config: ConnectionConfig): Connection {
     this.connection = this._create_connection(config);
     return this.connection;
   }
@@ -219,7 +241,7 @@ class DgraphORM {
       .newTxn()
       .queryWithVars(
         params.query,
-        params.variables
+        params.variables,
       );
   }
 
@@ -237,5 +259,5 @@ class DgraphORM {
       .mutate(mu);
   }
 }
-
-export default new DgraphORM();
+const Dgraph = new DgraphORM();
+export { Dgraph, DgraphClient, methods, Query };

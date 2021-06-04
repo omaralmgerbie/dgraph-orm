@@ -5,7 +5,7 @@
  *
  * @author Ashok Vishwakarma <akvlko@gmail.com>
  */
-import { Params } from './types';
+import { Params } from "./types";
 /**
  * Query
  *

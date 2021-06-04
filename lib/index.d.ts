@@ -10,24 +10,44 @@
  *
  */
 /**
+ * Operation
+ *
+ * from dgraph-js to perform database operation
+ *
+ * https://www.npmjs.com/package/dgraph-js
+ */
+import { DgraphClient } from "dgraph-js";
+/**
  * Schema
  *
  * dgraph-orm Schema class
  */
-import Schema from './schema';
+import Schema from "./schema";
 /**
  * Connection
  *
  * dgraph-orm Connection class
  */
-import Connection from './connection';
+import Connection from "./connection";
 /**
  * Model
  *
  * dgraph-orm Model class
  */
-import Model from './model';
-import { TypesType, SchemaFields, ConnectionConfig, QueryParams } from './types';
+import Model from "./model";
+/**
+ * Query
+ *
+ * dgraph-orm Query class
+ */
+import Query from "./query";
+/**
+ * methods
+ *
+ * dgraph-orm model methods
+ */
+import methods from "./helpers/methods";
+import { ConnectionConfig, QueryParams, SchemaFields, TypesType } from "./types";
 /**
  * DgraphORM
  *
@@ -156,5 +176,5 @@ declare class DgraphORM {
      */
     mutate(mutation: string): Promise<any>;
 }
-declare const _default: DgraphORM;
-export default _default;
+declare const Dgraph: DgraphORM;
+export { Dgraph, DgraphClient, methods, Query };
