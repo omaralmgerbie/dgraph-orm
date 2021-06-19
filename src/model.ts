@@ -852,8 +852,10 @@ class Model {
       params = {};
     }
 
-    if (!params.attributes || params.attributes.length === 0) {
+    if ((!params.attributes || params.attributes.length === 0) && original) {
       params.attributes = this._all_attributes(original);
+    } else {
+      params.attributes = [];
     }
 
     const _index = params.attributes.indexOf("uid");
@@ -861,7 +863,7 @@ class Model {
     if (_index !== -1) {
       params.attributes.splice(_index, 1);
     }
-
+if(original)
     this._check_attributes(original, params.attributes);
 
     params.attributes.unshift("uid");
