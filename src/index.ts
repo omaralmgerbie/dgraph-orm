@@ -226,6 +226,9 @@ class DgraphORM {
    */
   connect(config: ConnectionConfig): Connection {
     this.connection = this._create_connection(config);
+    console.log(config);
+    console.log(this.connection);
+    
     return this.connection;
   }
 

@@ -86,7 +86,8 @@ export default class Connection {
         `${this.config.host}:${this.config.port}`,
         this.config.credentails
       );
-  
+        console.log(this.clientStub);
+        
       this.client = new dgraph.DgraphClient(this.clientStub);
   
       if(this.config.debug) {
