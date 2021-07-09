@@ -150,7 +150,7 @@ declare class DgraphORM {
      *
      * @returns Model
      */
-    model(schema: Schema): Model;
+    model(schema: Schema, connection: Connection): Model;
     /**
      * connect
      *
