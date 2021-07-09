@@ -1,4 +1,4 @@
-import { ChannelCredentials } from '@grpc/grpc-js';
+import * as dgraph from 'dgraph-js';
 interface Base {
     include?: Include;
     filter?: Filter;
@@ -12,7 +12,7 @@ export interface ConnectionConfig {
     host?: string;
     port?: number;
     debug?: boolean;
-    credentails?: ChannelCredentials;
+    credentails?: dgraph.grpc.ChannelCredentials;
 }
 export interface Token {
     term?: boolean;

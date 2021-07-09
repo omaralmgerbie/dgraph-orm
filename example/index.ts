@@ -1,6 +1,6 @@
 import grpc from "@grpc/grpc-js";
 
-import dgraph from "../src";
+import {Dgraph as dgraph } from "../src/index";
 
 // console.log(grpc.credentials.createInsecure());
 

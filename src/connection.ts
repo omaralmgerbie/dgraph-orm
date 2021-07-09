@@ -18,7 +18,8 @@ import * as dgraph from 'dgraph-js';
  * 
  * https://www.npmjs.com/package/grpc
  */
-import * as grpc from '@grpc/grpc-js';
+import * as grpc from 'grpc';
+
 
 import { ConnectionConfig } from './types';
 
@@ -31,7 +32,7 @@ const _config: ConnectionConfig = {
   host: '127.0.0.1',
   port: 9080,
   debug: false,
-  credentails: grpc.credentials.createInsecure()
+  credentails: dgraph.grpc.credentials.createInsecure()
 }
 
 /**
