@@ -206,13 +206,13 @@ class DgraphORM {
    * 
    * @returns Model
    */
-  model(schema: Schema,connection:Connection): Model {
+  model(schema: Schema): Model {
     this._set_model(schema);
 
     return new Model(
       schema,
       this.models,
-      connection??this.connection,
+      this.connection,
       this._log.bind(this),
     );
   }

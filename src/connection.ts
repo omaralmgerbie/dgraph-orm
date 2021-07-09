@@ -81,7 +81,7 @@ export default class Connection {
       ..._config,
       ...config
     }
-    if (config!==null) 
+    
     try {
       this.clientStub = new dgraph.DgraphClientStub(
         `${this.config.host}:${this.config.port}`,
