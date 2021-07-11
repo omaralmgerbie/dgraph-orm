@@ -307,15 +307,27 @@ class Query {
             ? include[relation].reverse
             : `${relation}Reverse`
         }: ~${relation}{uid
-          expand(_all_)}`;
+          expand(_all_){}}`;
         // continue;
+        
+        _inc += `
+        ${
+          include[relation].as ? include[relation].as : relation
+        }: ${relation}`;
+        
+      } if (include[relation].expand) {
+        let type:string;
+        if (include[relation].expand.type) {
+          type=`expand(${include[relation].expand.type})`
+        } else {
+          type=`expand(_all_)`
+          
+        }
+        
+        _inc += `${relation} {uid
+          ${type}
+         }`
       }
-
-      _inc += `
-      ${
-        include[relation].as ? include[relation].as : relation
-      }: ${relation}`;
-
       const _limit: string = this._extras(include[relation]);
       const _order: string = this._parse_order(include[relation].order);
 
@@ -332,7 +344,7 @@ class Query {
       if (_order) {
         _inc += ` (${_order})`;
       }
-
+      if (Object.keys(include[relation]).length == 0)
       _inc += `{
         ${
         this._attributes(include[relation].attributes, include[relation].model)
