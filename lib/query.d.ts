@@ -119,6 +119,7 @@ declare class Query {
      * @returns string
      */
     private _include;
+    private _var;
     /**
      * _extra
      * @param params {Params}
@@ -140,5 +141,6 @@ declare class Query {
      * @returns string
      */
     private _build;
+    private _expand;
 }
 export default Query;

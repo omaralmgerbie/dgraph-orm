@@ -920,16 +920,20 @@ class Model {
 
     if (params.include) {
       for (let relation of Object.keys(params.include)) {
-        if (typeof original[relation] === "undefined") {
+        let unSkip: boolean = typeof params.include[relation].override === "undefined";
+        if (typeof original[relation] === "undefined" && unSkip) {
           throw new Error(`${this.schema.name} has no relation ${relation}`);
         }
-
+        if (unSkip) {
+  
         params.include[relation].model = original[relation].model;
 
         this._validate(
           this._models[original[relation].model],
           params.include[relation]
         );
+}
+          
       }
     }
 

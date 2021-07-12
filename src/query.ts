@@ -20,7 +20,7 @@ import { Include, Params } from "./types";
  * 
  * @type Array<string>
  */
-const _conditions: Array<string> = ["$or", "$and"];
+const _conditions: Array<string> = ["or", "and"];
 
 /**
  * Query
@@ -277,7 +277,9 @@ class Query {
     }
 
     if (_filters.length > 0) {
-      return ` @filter(${_filters.join(" AND ")})`;
+      console.log(name);
+      
+      return ` @filter(${_filters.join(` ${name==='or'?'OR':'AND'} `)})`;
     }
 
     return "";
@@ -335,7 +337,6 @@ class Query {
             this._parse_filter(include[relation].reverse.filter, include[relation].model):''
           }
         {
-          uid
           ${include[relation].reverse.include?this._include(include[relation].reverse.include, include[relation].model):''}
          ${ include[relation].reverse.exclude?'':("expand("+(include[relation].reverse.type?include[relation].reverse.type:'_all_'))+'){}}'}`;
         // continue;
@@ -345,7 +346,18 @@ class Query {
           include[relation].as ? include[relation].as : relation
         }: ${relation}`;
         
-      } if (include[relation].expand) {
+        } if (include[relation].extra) {
+          try {
+            
+            _inc += `${relation}: ${include[relation].filter?
+              this._parse_filter(include[relation].filter, 'or'):''
+            } {`
+          } catch (error) {
+            console.log(error);
+            
+          }
+        }
+      if (include[relation].expand) {
         let type:string;
         if (include[relation].expand.type) {
           type=`expand(${include[relation].expand.type})`
@@ -357,9 +369,35 @@ class Query {
         _inc += `${relation} {uid
           ${type}
          }`
-      } if (include[relation].var) {
-        _inc+= `${include[relation].var} as ${relation}`
+      } if (include[relation].var&& Array.isArray(include[relation].var)) {
+        include[relation].var.forEach((varible:any) => {
+          _inc += `
+          ${this._var(varible, relation, include[relation].model)}`
+        });
+      } else if (include[relation].var && !Array.isArray(include[relation].var)) {
+        _inc+=this._var(include[relation].var,relation,include[relation].model)
       }
+        
+      // if (include[relation].var) {
+      //   let vName: string=''
+      //   let reverse: string = ''
+      //   let filter: string = ''
+      //   if (typeof include[relation].var === 'string') {
+      //     vName=include[relation].var
+      //   } else {
+      //     vName=include[relation].var.name
+          
+      //   }
+      //   if (include[relation].var.reverse) {
+      //     reverse='~'
+      //   }
+      //   if (include[relation].var.filter) {
+      //     console.log(include[relation].var.filter);
+      //     filter = this._parse_filter(include[relation].var.filter, include[relation].model)
+          
+      //   }
+      //   _inc+= `${vName} as ${reverse}${relation} ${filter}`
+      // }
       if(include[relation].include)
       _inc+=`${this._include(include[relation].include, include[relation].model)}`
       // if (include[relation].var) {
@@ -368,7 +406,7 @@ class Query {
       const _limit: string = this._extras(include[relation]);
       const _order: string = this._parse_order(include[relation].order);
 
-      if (include[relation].filter) {
+      if (include[relation].filter &&!include[relation].extra) {
         _inc += `${
           this._parse_filter(include[relation].filter, include[relation].model)
         }`;
@@ -392,6 +430,29 @@ class Query {
     _inc+='}'
     }
     return _inc;
+  }
+
+  private _var(varbs: any,relation:string,model:any) {
+    if (varbs) {
+      let vName: string=''
+      let reverse: string = ''
+      let filter: string = ''
+      if (typeof varbs === 'string') {
+        vName=varbs
+      } else {
+        vName=varbs.name
+        
+      }
+      if (varbs.reverse) {
+        reverse='~'
+      }
+      if (varbs.filter) {
+        console.log(varbs.filter);
+        filter = this._parse_filter(varbs.filter, model)
+        
+      }
+      return `${vName} as ${reverse}${relation} ${filter}`
+    }
   }
 
   /**
@@ -474,8 +535,7 @@ class Query {
     } ${this._parse_filter(params.filter, this.name)} {
         ${params.exclude?'':this._attributes(params.attributes, this.name)}
         ${this._include(params.include)}
-        ${params.expand ? `uid
-        expand(${params.expand}){}` : ''}
+        ${this._expand(params.expand)}
         dgraphType:dgraph.type
         
       }
@@ -485,6 +545,23 @@ class Query {
 
     return query;
   }
+  private _expand(expandable: any): string{
+    if (typeof expandable === 'string') {
+      return `uid
+      expand(${expandable}){}`;
+    } else if (typeof expandable === 'object') {
+      let extraExp:string=''
+      if (expandable.expand) {
+        extraExp = this._expand(expandable.expand);
+      }
+      return `uid
+      expand(${expandable.name}){
+        ${extraExp}
+      }`;
+    } else return ''
+  
+  }
 }
+
 
 export default Query;
