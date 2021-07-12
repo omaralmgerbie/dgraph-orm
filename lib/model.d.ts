@@ -79,6 +79,18 @@ declare class Model {
      */
     checkPassword(uid: string, field: string, password: string): Promise<any>;
     /**
+       * var
+       * @param var {string}
+       *
+       * @returns Promise<new>
+       */
+    var(queries: {
+        type: string;
+        field: string;
+        value?: any;
+        params?: any;
+    }[]): Promise<any>;
+    /**
      * _generate_methods
      *
      * @returns void

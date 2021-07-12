@@ -19,6 +19,12 @@ declare class Query {
      */
     private name;
     /**
+     * nest
+     *
+     * @type boolean
+     */
+    private nest;
+    /**
      * params
      *
      * @type Params
@@ -66,10 +72,11 @@ declare class Query {
      * @param field {string}
      * @param value {any}
      * @param params {Params}
+     * @param nest {boolean}
      * @param name {string}
      * @param logger {Function}
      */
-    constructor(type: string, field: string, value: any, params: Params, name: string, logger: Function);
+    constructor(type: string, field: string, value: any, params: Params, name: string, logger: Function, nest?: boolean);
     /**
      * _where
      * @param type {string}

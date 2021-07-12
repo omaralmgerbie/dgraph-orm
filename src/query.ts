@@ -36,6 +36,13 @@ class Query {
   private name: string;
 
   /**
+   * nest
+   * 
+   * @type boolean
+   */
+  private nest: boolean;
+
+  /**
    * params
    * 
    * @type Params
@@ -90,6 +97,7 @@ class Query {
    * @param field {string}
    * @param value {any}
    * @param params {Params}
+   * @param nest {boolean}
    * @param name {string}
    * @param logger {Function}
    */
@@ -100,7 +108,9 @@ class Query {
     params: Params,
     name: string,
     logger: Function,
+    nest: boolean=false,
   ) {
+    this.nest = nest;
     this.name = name;
     this.params = params;
     this.type = type;
@@ -182,12 +192,25 @@ class Query {
    * @returns string
    */
   private _filter(key: string, value: any, name: string): string {
-    if (key.toLowerCase() === "$has") {
-      return `${key.replace("$", "")}(${value})`;
+    let not = ``
+    if (typeof value === "object" && !Array.isArray(value) && value.not) {
+      not='NOT'
+    }
+    if (key.toLowerCase() === "has") {
+      let val=(typeof value === "object"?value.value:value)
+      return `${not} ${key}(${val})`;
+    }
+    if (key.toLowerCase() === "uid") {
+      let val=(typeof value === "object"?value.value:value)
+      return `${not} ${key}(${val})`;
+    }
+    if (key.toLowerCase() === "type") {
+      let val=(typeof value === "object"?value.value:value)
+      return `${not} ${key}(${val})`;
     }
 
     if (typeof value === "string") {
-      return `eq(${key}, "${value}")`;
+      return `${not} eq(${key}, "${value}")`;
     }
 
     if (typeof value === "object" && !Array.isArray(value)) {
@@ -199,21 +222,21 @@ class Query {
         if (Array.isArray(_value)) {
           const _sub: Array<string> = [];
           _value.forEach((_val: any) => {
-            _sub.push(`uid_in(${key}, ${_val})`);
+            _sub.push(`${not} uid_in(${key}, "${_val}")`);
           });
 
           return _sub.join(" OR ");
         }
 
-        if (typeof _value === "string" && _key !== "$regexp") {
+        if (typeof _value === "string" && _key !== "regexp") {
           _value = '"' + _value + '"';
         }
 
-        if (_key === "$ne") {
+        if (_key === "ne") {
           return `NOT eq(${key}, ${_value})`;
         }
 
-        return `${_key.replace("$", "")}(${key}, ${_value})`;
+        return `${not} ${_key}(${key}, ${_value})`;
       }
     }
   }
@@ -300,16 +323,23 @@ class Query {
         }Count: count(${relation})`;
         // continue;
       }
-      if (include[relation].reverse) {
+      if(relation)
+      if (include[relation].reverse ) {
         _inc += `
         ${
-          include[relation].reverse
-            ? include[relation].reverse
+          include[relation].reverse.name
+            ? include[relation].reverse.name
             : `${relation}Reverse`
-        }: ~${relation}{uid
-          expand(_all_){}}`;
+          }: ~${relation}
+          ${include[relation].reverse.filter?
+            this._parse_filter(include[relation].reverse.filter, include[relation].model):''
+          }
+        {
+          uid
+          ${include[relation].reverse.include?this._include(include[relation].reverse.include, include[relation].model):''}
+         ${ include[relation].reverse.exclude?'':("expand("+(include[relation].reverse.type?include[relation].reverse.type:'_all_'))+'){}}'}`;
         // continue;
-        
+       if(include[relation].as ) 
         _inc += `
         ${
           include[relation].as ? include[relation].as : relation
@@ -327,7 +357,14 @@ class Query {
         _inc += `${relation} {uid
           ${type}
          }`
+      } if (include[relation].var) {
+        _inc+= `${include[relation].var} as ${relation}`
       }
+      if(include[relation].include)
+      _inc+=`${this._include(include[relation].include, include[relation].model)}`
+      // if (include[relation].var) {
+        
+      // }
       const _limit: string = this._extras(include[relation]);
       const _order: string = this._parse_order(include[relation].order);
 
@@ -351,8 +388,9 @@ class Query {
       }
         ${this._include(include[relation].include, include[relation].model)}
       }`;
+      if ((!include[relation].isNest)&&_inc.charAt(_inc.length - 1) !== '}')
+    _inc+='}'
     }
-
     return _inc;
   }
 
@@ -430,16 +468,18 @@ class Query {
       _limit = `, ${_limit}`;
     }
 
-    const query: string = `{
+    const query: string = `${this.nest?'':'{'}
       ${this.name} ${
       this.where.replace("{{ORDER}}", _order).replace("{{LIMIT}}", _limit)
     } ${this._parse_filter(params.filter, this.name)} {
-        ${this._attributes(params.attributes, this.name)}
+        ${params.exclude?'':this._attributes(params.attributes, this.name)}
         ${this._include(params.include)}
+        ${params.expand ? `uid
+        expand(${params.expand}){}` : ''}
         dgraphType:dgraph.type
         
       }
-    }`;
+    ${this.nest?'':'}'}`;
 
     this.logger(query);
 

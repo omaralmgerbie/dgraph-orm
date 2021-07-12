@@ -67,7 +67,7 @@ class Model {
   /**
    * index type support
    */
-  [index: string]: any
+  [index: string]: any;
 
   /**
    * schema
@@ -108,7 +108,7 @@ class Model {
     schema: Schema,
     models: any,
     connection: Connection,
-    logger: Function,
+    logger: Function
   ) {
     this.schema = schema;
     this._models = models;
@@ -147,7 +147,8 @@ class Model {
     let _data: any = null;
 
     if (
-      params.field.length === 1 && _user[0][params.field[0]] &&
+      params.field.length === 1 &&
+      _user[0][params.field[0]] &&
       _user[0][params.field[0]].length > 0
     ) {
       const _attributes =
@@ -160,9 +161,10 @@ class Model {
     } else {
       _data = {};
       params.field.forEach((_field: string) => {
-        const _attributes = params.attributes && params.attributes[_field]
-          ? params.attributes[_field]
-          : ["uid"];
+        const _attributes =
+          params.attributes && params.attributes[_field]
+            ? params.attributes[_field]
+            : ["uid"];
         if (!_user[0][_field]) {
           _data[_field] = null;
         } else {
@@ -214,7 +216,7 @@ class Model {
   async checkPassword(
     uid: string,
     field: string,
-    password: string,
+    password: string
   ): Promise<any> {
     return new Promise(async (resolve: Function, reject: Function) => {
       try {
@@ -238,6 +240,50 @@ class Model {
       }
     });
   }
+/**
+   * var
+   * @param var {string}
+   *
+   * @returns Promise<new>
+   */
+  async var(
+    queries: {
+      type: string;
+      field: string;
+      value?: any;
+      params?: any;
+    }[
+      
+    ]
+  ): Promise<any> {
+    let _nestQuery: Array<string> = [];
+    queries.forEach(({ type, field, value = null, params = null }, index) => {
+      if (type === methods.uid || type === methods.has) {
+        params = value;
+        value = field;
+      } else if (type === methods.type) {
+        field = this.schema.name;
+        params = value;
+      }
+
+      const _params: any = this._validate(this.schema.original, params);
+
+      const query: Query = new Query(
+        type,
+        field,
+        value,
+        _params,
+        index === 0 ? this.schema.name : "var",
+        this._logger,true
+      );
+      // console.log(query.query);
+      _nestQuery.push(query.query);
+      // return this._execute(query.query);
+    });
+    
+    console.log(_nestQuery.reverse().join(''));
+    return this._execute(`{${_nestQuery.reverse().join('')}}`)
+  }
 
   /**
    * _generate_methods
@@ -249,7 +295,7 @@ class Model {
       Model.prototype[_method] = function (
         field: string,
         value: any = null,
-        params: any = null,
+        params: any = null
       ): Promise<any> {
         return this._method(_method, field, value, params);
       };
@@ -291,7 +337,7 @@ class Model {
     type: string,
     field: any,
     value: any = null,
-    params: any = null,
+    params: any = null
   ): Promise<any> {
     if (type === methods.uid || type === methods.has) {
       params = value;
@@ -309,7 +355,7 @@ class Model {
       value,
       _params,
       this.schema.name,
-      this._logger,
+      this._logger
     );
     console.log(query.query);
 
@@ -374,7 +420,8 @@ class Model {
     const _field = this.schema.original[_key];
 
     if (
-      typeof _field !== "undefined" && typeof _field !== "string" &&
+      typeof _field !== "undefined" &&
+      typeof _field !== "string" &&
       _field.type === "uid"
     ) {
       return true;
@@ -392,7 +439,7 @@ class Model {
    */
   private _parse_mutation(
     mutation: any,
-    name: string,
+    name: string
   ): { [index: string]: any } {
     let _mutation: { [index: string]: any } = {};
 
@@ -723,7 +770,7 @@ class Model {
            data (func: eq(${_key}, ${_mvalue})) {
             ${_key}: ${_key}
            }
-          }`,
+          }`
         );
 
         if (_value.getJson().data.length > 0) {
@@ -766,7 +813,7 @@ class Model {
     original: any,
     data: any,
     isUpdate: boolean = false,
-    isRelation: boolean = false,
+    isRelation: boolean = false
   ): void {
     let attributes: Array<string> = data;
     let haveData: boolean = false;
@@ -795,25 +842,28 @@ class Model {
         _lang_fields.indexOf(attribute.split("@")[0]) === -1
       ) {
         throw new Error(
-          `${this.schema.name} has no lang property in ${attribute}`,
+          `${this.schema.name} has no lang property in ${attribute}`
         );
       } else if (
         typeof original[attribute] === "object" &&
-        original[attribute].type !== "uid" && isRelation
+        original[attribute].type !== "uid" &&
+        isRelation
       ) {
         throw new Error(`${attribute} is not a relation.`);
       } else if (
         typeof original[attribute] === "object" &&
-        original[attribute].type === "uid" && !isUpdate
+        original[attribute].type === "uid" &&
+        !isUpdate
       ) {
         throw new Error(`${attribute} is a realtion and must be in include.`);
       } else if (
         typeof original[attribute] === "object" &&
-        original[attribute].replace && haveData &&
+        original[attribute].replace &&
+        haveData &&
         Array.isArray(data[attribute])
       ) {
         throw new Error(
-          `The value of ${attribute} cannot be an array as it has replace set to true.`,
+          `The value of ${attribute} cannot be an array as it has replace set to true.`
         );
       }
     }
@@ -829,7 +879,8 @@ class Model {
     const _attrs: Array<string> = [];
     for (let attr of Object.keys(original)) {
       if (
-        original[attr].type === "uid" || original[attr] === "password" ||
+        original[attr].type === "uid" ||
+        original[attr] === "password" ||
         original[attr].type === "password"
       ) {
         continue;
@@ -863,8 +914,7 @@ class Model {
     if (_index !== -1) {
       params.attributes.splice(_index, 1);
     }
-if(original)
-    this._check_attributes(original, params.attributes);
+    if (original) this._check_attributes(original, params.attributes);
 
     params.attributes.unshift("uid");
 
@@ -878,7 +928,7 @@ if(original)
 
         this._validate(
           this._models[original[relation].model],
-          params.include[relation],
+          params.include[relation]
         );
       }
     }
