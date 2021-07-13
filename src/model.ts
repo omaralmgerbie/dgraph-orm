@@ -281,7 +281,7 @@ class Model {
       // return this._execute(query.query);
     });
     
-    console.log(_nestQuery.reverse().join(''));
+    // console.log(_nestQuery.reverse().join(''));
     return this._execute(`{${_nestQuery.reverse().join('')}}`)
   }
 
@@ -709,7 +709,7 @@ class Model {
           _params[`${_key}`] = null;
         }
       }
-      console.log(_params);
+      // console.log(_params);
 
       if (Array.isArray(uid)) {
         const _p: any = [];

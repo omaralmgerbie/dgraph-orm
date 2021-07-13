@@ -277,7 +277,7 @@ class Query {
     }
 
     if (_filters.length > 0) {
-      console.log(name);
+      // console.log(name);
       
       return ` @filter(${_filters.join(` ${name==='or'?'OR':'AND'} `)})`;
     }
@@ -447,7 +447,7 @@ class Query {
         reverse='~'
       }
       if (varbs.filter) {
-        console.log(varbs.filter);
+        // console.log(varbs.filter);
         filter = this._parse_filter(varbs.filter, model)
         
       }
