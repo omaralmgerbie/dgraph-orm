@@ -1,6 +1,5 @@
 import * as dgraph from 'dgraph-js';
 // import { grpc } from 'dgraph-js';
-import * as grpc from 'grpc';
 
 
 interface Base {
