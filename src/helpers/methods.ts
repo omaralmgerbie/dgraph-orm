@@ -16,6 +16,7 @@ const uid: string = "uid";
 const allofterms: string = "allofterms";
 
 const anyofterms: string = "anyofterms";
+const match: string = "match";
 
 const regexp: string = "regexp";
 
@@ -35,6 +36,7 @@ const Methods: MethodsType = {
   uid,
   allofterms,
   anyofterms,
+  match,
   regexp,
   anyoftext,
   alloftext,

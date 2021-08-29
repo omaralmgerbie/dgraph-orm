@@ -58,6 +58,7 @@ export interface MethodsType {
     uid: string;
     allofterms: string;
     anyofterms: string;
+    match: string;
     regexp: string;
     anyoftext: string;
     alloftext: string;

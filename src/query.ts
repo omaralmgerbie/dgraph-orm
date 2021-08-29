@@ -151,6 +151,9 @@ class Query {
       case methods.regexp:
         _where = `(func: ${type}(${field}, ${value}){{ORDER}}{{LIMIT}})`;
         break;
+      case methods.match:
+        _where = `(func: ${type}(${field}, ${value}){{ORDER}}{{LIMIT}})`;
+        break;
 
       case methods.uid:
         if (Array.isArray(field)) {
@@ -209,7 +212,7 @@ class Query {
       return `${not} ${key}(${val})`;
     }
 
-    if (typeof value === "string") {
+    if (typeof value === "string"|| typeof value === "boolean") {
       return `${not} eq(${key}, "${value}")`;
     }
 
@@ -335,7 +338,7 @@ class Query {
           }: ~${relation}
           ${include[relation].reverse.filter?
             this._parse_filter(include[relation].reverse.filter, include[relation].model):''
-          }
+          }{{ORDER}}{{LIMIT}}
         {
           ${include[relation].reverse.include?this._include(include[relation].reverse.include, include[relation].model):''}
          ${ include[relation].reverse.exclude?'':("expand("+(include[relation].reverse.type?include[relation].reverse.type:'_all_'))+'){}}'}`;
@@ -412,13 +415,13 @@ class Query {
         }`;
       }
 
-      if (_limit) {
-        _inc += ` (${_limit}) `;
-      }
+      // if (_limit) {
+      //   _inc += ` (${_limit}) `;
+      // }
 
-      if (_order) {
-        _inc += ` (${_order})`;
-      }
+      // if (_order) {
+      //   _inc += ` (${_order})`;
+      // }
       if (Object.keys(include[relation]).length == 0)
       _inc += `{
         ${
@@ -427,7 +430,8 @@ class Query {
         ${this._include(include[relation].include, include[relation].model)}
       }`;
       if ((!include[relation].isNest)&&_inc.charAt(_inc.length - 1) !== '}')
-    _inc+='}'
+        _inc += '}'
+      _inc = _inc.replace("{{ORDER}}", _order ? '(' + _order + ')':'').replace("{{LIMIT}}",_limit? '('+_limit+')':'');
     }
     return _inc;
   }
@@ -496,11 +500,11 @@ class Query {
       if (Array.isArray(order[0])) {
         order.forEach((_o: any) => {
           if (typeof _o[1] !== "undefined") {
-            _order.push(`order${_o[1].toLowerCase()}: ${this.name}.${_o[0]}`);
+            _order.push(`order${_o[1].toLowerCase()}: ${_o[0]}`);
           }
         });
       } else {
-        _order.push(`order${order[1].toLowerCase()}: ${this.name}.${order[0]}`);
+        _order.push(`order${order[1].toLowerCase()}: ${order[0]}`);
       }
     }
 
