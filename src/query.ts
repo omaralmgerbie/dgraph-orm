@@ -341,7 +341,7 @@ class Query {
           }{{ORDER}}{{LIMIT}}
         {
           ${include[relation].reverse.include?this._include(include[relation].reverse.include, include[relation].model):''}
-         ${ include[relation].reverse.exclude?'':("expand("+(include[relation].reverse.type?include[relation].reverse.type:'_all_'))+'){}}'}`;
+         ${ include[relation].reverse.exclude?'':("expand("+(include[relation].reverse.type?include[relation].reverse.type:'_all_'))+'){uid  expand(_all_)}}'}`;
         // continue;
        if(include[relation].as ) 
         _inc += `
